@@ -59,7 +59,7 @@ struct Reminder: Identifiable {
 
     static let samples = [
         Reminder(title: "Water the plants"),
-        Reminder(title: "Reply to Sam"),
+        Reminder(title: "Reply to John Appleseed"),
         Reminder(title: "Book flights", isFlagged: true),
         Reminder(title: "Renew library card")
     ]
