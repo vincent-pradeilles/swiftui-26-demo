@@ -14,7 +14,7 @@ struct SwipeActionsDemo: View {
 
     var body: some View {
         ScrollView {
-            LazyVStack(spacing: 0) {
+            LazyVStack(spacing: 12) {
                 ForEach(reminders) { reminder in
                     ReminderRow(reminder: reminder)
                         .swipeActions(edge: .leading) {
@@ -32,10 +32,9 @@ struct SwipeActionsDemo: View {
                                 Label("Delete", systemImage: "trash")
                             }
                         }
-
-                    Divider()
                 }
             }
+            .padding()
         }
         .swipeActionsContainer()
         .navigationTitle("Swipe Actions")
@@ -79,8 +78,9 @@ private struct ReminderRow: View {
         }
         .padding()
         .frame(maxWidth: .infinity, alignment: .leading)
-        .contentShape(.rect)
-        .background(.background)
+        .background(.background, in: .rect(cornerRadius: 12))
+        .shadow(color: .black.opacity(0.1), radius: 4, y: 2)
+        .contentShape(.rect(cornerRadius: 12))
     }
 }
 
