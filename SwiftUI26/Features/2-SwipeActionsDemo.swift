@@ -5,44 +5,33 @@ import SwiftUI
 /// `swipeActions` used to work only inside a `List`. Now it works in any
 /// scrollable container once you mark that container with
 /// `.swipeActionsContainer()`. The per-row `swipeActions` modifier is
-/// unchanged. The new `onPresentationChanged` callback reports when a row's
-/// actions are revealed or hidden.
+/// unchanged: swipe from the trailing edge by default, or pass `edge:` for
+/// the leading edge.
+///
 struct SwipeActionsDemo: View {
-    @State private var reminders = Reminder.sample
-    @State private var revealedID: Reminder.ID?
+    
+    @State private var reminders = Reminder.samples
 
     var body: some View {
         ScrollView {
-            Text("Swipe a row left to delete, or right to flag — all inside a "
-                 + "plain ScrollView + LazyVStack.")
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.horizontal)
-
             LazyVStack(spacing: 0) {
                 ForEach(reminders) { reminder in
-                    ReminderRow(
-                        reminder: reminder,
-                        isRevealed: revealedID == reminder.id
-                    )
-                    .swipeActions(edge: .leading) {
-                        Button {
-                            toggleFlag(reminder)
-                        } label: {
-                            Label("Flag", systemImage: "flag")
+                    ReminderRow(reminder: reminder)
+                        .swipeActions(edge: .leading) {
+                            Button {
+                                toggleFlag(reminder)
+                            } label: {
+                                Label("Flag", systemImage: "flag")
+                            }
+                            .tint(.orange)
                         }
-                        .tint(.orange)
-                    } onPresentationChanged: { isPresented in
-                        revealedID = isPresented ? reminder.id : nil
-                    }
-                    .swipeActions {
-                        Button(role: .destructive) {
-                            delete(reminder)
-                        } label: {
-                            Label("Delete", systemImage: "trash")
+                        .swipeActions {
+                            Button(role: .destructive) {
+                                delete(reminder)
+                            } label: {
+                                Label("Delete", systemImage: "trash")
+                            }
                         }
-                    }
 
                     Divider()
                 }
@@ -51,7 +40,9 @@ struct SwipeActionsDemo: View {
         .swipeActionsContainer()
         .navigationTitle("Swipe Actions")
     }
+}
 
+extension SwipeActionsDemo {
     private func delete(_ reminder: Reminder) {
         reminders.removeAll { $0.id == reminder.id }
     }
@@ -67,19 +58,16 @@ struct Reminder: Identifiable {
     var title: String
     var isFlagged = false
 
-    static let sample: [Reminder] = [
+    static let samples = [
         Reminder(title: "Water the plants"),
         Reminder(title: "Reply to Sam"),
         Reminder(title: "Book flights", isFlagged: true),
-        Reminder(title: "Renew library card"),
-        Reminder(title: "Buy birthday gift"),
-        Reminder(title: "Schedule dentist")
+        Reminder(title: "Renew library card")
     ]
 }
 
 private struct ReminderRow: View {
     let reminder: Reminder
-    let isRevealed: Bool
 
     var body: some View {
         HStack {
@@ -88,12 +76,6 @@ private struct ReminderRow: View {
                     .foregroundStyle(.orange)
             }
             Text(reminder.title)
-            Spacer()
-            if isRevealed {
-                Text("Actions shown")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
         }
         .padding()
         .frame(maxWidth: .infinity, alignment: .leading)

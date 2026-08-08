@@ -9,7 +9,7 @@ import SwiftUI
 /// * `visibilityPriority(.high)` — keep an item in the bar under pressure.
 /// * `ToolbarOverflowMenu` — items that always live in the overflow menu.
 /// * `.topBarPinnedTrailing` — an item pinned to the trailing edge.
-/// * `toolbarMinimizeBehavior(.onScrollDown)` — shrink the bar while scrolling.
+/// * `toolbarMinimizationBehavior(.onScrollDown)` — shrink the bar while scrolling.
 /// * `ForEach` inside the `toolbar` builder — generate items from data.
 struct ToolbarDemo: View {
     @State private var lastAction = "Nothing yet"
@@ -42,7 +42,7 @@ struct ToolbarDemo: View {
             .padding()
         }
         .navigationTitle("Toolbar")
-        .toolbarMinimizeBehavior(.onScrollDown, for: .navigationBar)
+        .toolbarMinimizationBehavior(.onScrollDown, for: .navigationBar)
         .toolbar {
             // Stays in the bar even when space is tight.
             ToolbarItemGroup {

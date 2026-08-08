@@ -37,6 +37,37 @@ struct ReorderableDemo: View {
     }
 }
 
+/// Applies a `ReorderDifference` to a single-collection container in one
+/// in-place pass. `ReorderDifference` describes the move but leaves applying
+/// it to your data up to you, so we provide this reusable helper.
+extension ReorderDifference where CollectionID == ReorderableSingleCollectionIdentifier {
+    func apply<C>(to collection: inout C)
+        where C: RangeReplaceableCollection,
+              C.Element: Identifiable,
+              C.Element.ID == ItemID
+    {
+        let moving = Set(sources)
+        guard !moving.isEmpty else { return }
+
+        // One in-place pass: drop the moved items and capture them in order.
+        var moved: [C.Element] = []
+        moved.reserveCapacity(moving.count)
+        collection.removeAll { element in
+            guard moving.contains(element.id) else { return false }
+            moved.append(element)
+            return true
+        }
+
+        switch destination.position {
+        case .before(let id):
+            let index = collection.firstIndex { $0.id == id } ?? collection.endIndex
+            collection.insert(contentsOf: moved, at: index)
+        case .end:
+            collection.append(contentsOf: moved)
+        }
+    }
+}
+
 /// A colored tile. `Identifiable` is required by `reorderContainer(for:)`.
 struct Tile: Identifiable {
     let id = UUID()
@@ -71,36 +102,6 @@ private struct TileView: View {
             // Match the lifted drag preview to the tile's rounded shape so the
             // system's preview platter doesn't show white corners behind it.
             .contentShape(.dragPreview, RoundedRectangle(cornerRadius: 16))
-    }
-}
-
-/// Applies a single-collection `ReorderDifference` to an array in one pass.
-/// Reusable for any container whose elements are `Identifiable`.
-extension ReorderDifference where CollectionID == ReorderableSingleCollectionIdentifier {
-    func apply<C>(to collection: inout C)
-    where C: RangeReplaceableCollection,
-          C.Element: Identifiable,
-          C.Element.ID == ItemID {
-        let moving = Set(sources)
-        guard !moving.isEmpty else { return }
-
-        // Remove the moved items, capturing them in their current order.
-        var moved: [C.Element] = []
-        moved.reserveCapacity(moving.count)
-        collection.removeAll { element in
-            guard moving.contains(element.id) else { return false }
-            moved.append(element)
-            return true
-        }
-
-        // Re-insert them at the destination.
-        switch destination.position {
-        case .before(let id):
-            let index = collection.firstIndex { $0.id == id } ?? collection.endIndex
-            collection.insert(contentsOf: moved, at: index)
-        case .end:
-            collection.append(contentsOf: moved)
-        }
     }
 }
 
